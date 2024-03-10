@@ -1,31 +1,10 @@
 #!/usr/bin/env bash
-#config nginx
-sudo apt remove --purge nginx nginx-full nginx-common -y
-sudo apt update
-sudo apt install nginx -y
-sudo touch /var/www/html/index.html
+# Bash script that install and configure HAproxy
 
-echo "Holberton School" | sudo tee /var/www/html/index.html
-sudo touch /var/www/html/error404.html
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/error404.html
+sudo apt-get -y update
+sudo apt-get -y install haproxy
 
-printf %s 'server {
-        listen 80 default_server;
-	        listen [::]:80 default_server;
+str_haproxy="frontend http\n\tbind *:80\n\tmode http\n\tdefault_backend web-backend\n\nbackend web-backend\n\tbalance roundrobin\n\tserver 924-web-01 34.74.113.207:80 check\n\tserver 924-web-02 35.227.64.73:80 check"
+echo -e "$str_haproxy" >> /etc/haproxy/haproxy.cfg
 
-        root /var/www/html;
-
-        index index.html;
-	        error_page 404 /error404.html;
-
-        server_name _;
-
-        add_header X-Served-By $hostname;
-
-        location /redirect_me {
-	           return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4/;
-		           }
-			   }
-			   ' | sudo tee /etc/nginx/sites-available/default
-
-sudo service nginx restart
+sudo service haproxy restart
